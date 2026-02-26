@@ -15,6 +15,10 @@ class Ant{
     this.wanderStrength=0.1;
   }
 
+  setPos(x,y){
+    this.pos.set(x,y);
+  }
+
   show(scale){
     noStroke();
     fill(0)
