@@ -8,12 +8,15 @@ class Ant{
     this.angle=angle;
 
     this.desiredDir=createVector(0,0);
+    this.desiredWallReflectionDir=createVector(0,0);
+    
     this.desiredVel=createVector(0,0);
     this.desiredTurningForce=createVector(0,0);
     
     this.maxSpeed=1;
-    this.turningStrength=1;
-    this.wanderStrength=0.1;
+    this.turningStrength=0.5;
+    this.wanderStrength=0.3;
+    this.wallReflectStrength=0.4;
 
     this.groundC=groundColor;
     this.wallC=wallColor;
@@ -41,7 +44,7 @@ class Ant{
   }
 
   wallCollision(map,sensorOffset=3,push=-0.6){
-
+    this.desiredWallReflectionDir.set(0,0)
     for (let i = -1; i < 2; i++) {
       for (let j = -1; j < 2; j++) {
         let x = floor(this.pos.x + i * sensorOffset);
@@ -63,6 +66,10 @@ class Ant{
             b === this.wallC[2]) {
           //print("Wall");
           this.pos.add(push*i,push*j)
+
+          let away = createVector(-i, -j);
+          away.normalize();
+          this.desiredWallReflectionDir.add(away)
         }
 
         if (r === this.groundC[0] &&
@@ -73,44 +80,15 @@ class Ant{
       }
     }
 
-    //Up
-    /*
-    for (let i = 0; i < array.length; i++) {
-      for (let j = 0; j < array.length; j++) {
-        
-      }
-    }*/
-    
-    //Right
-    /*
-    for (let i = 0; i < array.length; i++) {
-      for (let j = 0; j < array.length; j++) {
-        
-      }
-    }*/
-    
-    //Down
-    /*
-    for (let i = 0; i < array.length; i++) {
-      for (let j = 0; j < array.length; j++) {
-        
-      }
-    }*/
-    
-    //Left
-    /*
-    for (let i = 0; i < array.length; i++) {
-      for (let j = 0; j < array.length; j++) {
-        
-      }
-    }*/
-    
   }
 
   move(){
     let randomUnitVector= p5.Vector.random2D();
     randomUnitVector.mult(this.wanderStrength)
     this.desiredDir.add(randomUnitVector)
+
+    this.desiredWallReflectionDir.mult(this.wallReflectStrength)
+    this.desiredDir.add(this.desiredWallReflectionDir)
     this.desiredDir.normalize();
 
     this.desiredVel=this.desiredDir.copy();

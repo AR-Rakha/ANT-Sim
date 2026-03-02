@@ -1,7 +1,7 @@
 let canvasSize=[1200, 600];
 
 // ----- ANT Settings -----
-let total=500;
+let total=100;
 let ants=[];
 
 // ----- Graphics -----
@@ -17,7 +17,7 @@ let FoodColor=[80, 230, 50];
 
 // ----- Modes (Booleans) -----
 let drawMap=false;
-let drawFood=true
+let drawFood=true;
 let runAnts=true;
 
 // ----- Buttons -----
@@ -41,18 +41,20 @@ function setup()
 	foodMap.pixelDensity(1);
 
 	map.background(groundColor);
-	foodMap.background(0);
-	drawBorder()
+	foodMap.clear();
+	drawMapBorder()
 }
 
 function draw()
 {
 	map.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
-	background(FoodColor);
+	background(0);
 	
-	(maskedMap = map.get()).mask(foodMap.get());
 	
-	image(maskedMap, 0,0);
+	image(map, 0,0);	
+	blendMode(REMOVE);
+  image(foodMap, 0, 0);
+  blendMode(BLEND);
 	
 	
 	if(runAnts){
@@ -67,11 +69,12 @@ function draw()
 function keyPressed() {
   if (drawMap && key === 'r') {
     map.background(groundColor);
-		drawBorder()
+		
+		drawMapBorder()
   }
 }
 
-function drawBorder(){
+function drawMapBorder(){
 	map.noFill()
 	map.stroke(wallColor);
 	map.strokeWeight(100)		
@@ -95,19 +98,19 @@ function mouseDragged() {
 	if(drawFood){
 		if(mouseButton === LEFT){
 			foodMap.stroke(255);
-			foodMap.blendMode(REMOVE);
+			foodMap.blendMode(BLEND);
 			foodMap.strokeWeight(10);
 			foodMap.line(pmouseX, pmouseY,mouseX, mouseY);
 			foodMap.blendMode(BLEND)
 			
 		}else if(mouseButton === RIGHT){
 			foodMap.stroke(0);
-			foodMap.blendMode(BLEND)
+			foodMap.blendMode(REMOVE)
 			foodMap.strokeWeight(30);
 			foodMap.line(pmouseX, pmouseY,mouseX, mouseY);
 			
 			
 		}
 	}
-	drawBorder()
+	drawMapBorder()
 }
