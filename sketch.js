@@ -1,7 +1,7 @@
 let canvasSize=[1200, 600];
 
 // ----- ANT Settings -----
-let total=100;
+let total=1500;
 let ants=[];
 
 // ----- Graphics -----
@@ -16,8 +16,8 @@ let groundColor=[170, 120, 80];
 let FoodColor=[80, 230, 50];
 
 // ----- Modes (Booleans) -----
-let drawMap=false;
-let drawFood=true;
+let drawMap=true;
+let drawFood=false;
 let runAnts=true;
 
 // ----- Buttons -----
@@ -33,7 +33,7 @@ function setup()
 	foodMap=createGraphics(canvasSize[0],canvasSize[1]);
 
 	for (let i = 0; i < total; i++) {
-		ants.push(new Ant(300,300,random(0,PI),groundColor,wallColor,FoodColor))
+		ants.push(new Ant(300,300,PI/2*3,groundColor,wallColor,FoodColor))
 	}
 
 	pixelDensity(1)
@@ -77,7 +77,7 @@ function keyPressed() {
 function drawMapBorder(){
 	map.noFill()
 	map.stroke(wallColor);
-	map.strokeWeight(100)		
+	map.strokeWeight(50)		
 	map.rect(0,0,canvasSize[0],canvasSize[1]);
 }
 

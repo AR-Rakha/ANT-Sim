@@ -7,20 +7,28 @@ class Ant{
 
     this.angle=angle;
 
-    this.desiredDir=createVector(0,0);
+    this.desiredDir=createVector(cos(angle),sin(angle));
     this.desiredWallReflectionDir=createVector(0,0);
     
     this.desiredVel=createVector(0,0);
     this.desiredTurningForce=createVector(0,0);
     
-    this.maxSpeed=1;
-    this.turningStrength=0.5;
+    this.maxSpeed=2;
+    this.turningStrength=1.2;
     this.wanderStrength=0.3;
     this.wallReflectStrength=0.4;
 
     this.groundC=groundColor;
     this.wallC=wallColor;
     this.FoodC=FoodColor;
+
+    this.directions=[]
+    this.checkPoints=16
+
+    for (let i = 0; i < this.checkPoints; i++) {
+      this.directions.push(createVector(cos(PI/(this.checkPoints/2)*i), sin(PI/(this.checkPoints/2)*i)))
+      
+    }
   }
 
   setPos(x,y){
@@ -43,46 +51,50 @@ class Ant{
     map.loadPixels();
   }
 
-  wallCollision(map,sensorOffset=3,push=-0.6){
+  wallCollision(map,sensorOffset=3){
+
     this.desiredWallReflectionDir.set(0,0)
-    for (let i = -1; i < 2; i++) {
-      for (let j = -1; j < 2; j++) {
-        let x = floor(this.pos.x + i * sensorOffset);
-        let y = floor(this.pos.y + j * sensorOffset);
+    
+    for (let dir of this.directions) {
+      let x = round(this.pos.x + dir.x * sensorOffset);
+      let y = round(this.pos.y + dir.y * sensorOffset);
 
-        // Make sure we are inside canvas
-        if (x < 0 || x >= width || y < 0 || y >= height) continue;
-        if (this.pos.x < 0 || this.pos.x >= width || this.pos.y < 0 || this.pos.y >= height) this.pos=this.colonyPos.copy();
+      // Make sure we are inside canvas
+      if (x < 0 || x >= width || y < 0 || y >= height) continue;
+      if (this.pos.x < 0 || this.pos.x >= width || this.pos.y < 0 || this.pos.y >= height) this.pos=this.colonyPos.copy();
 
-        let index = 4 * (y * width + x);
+      let index;
 
-        let r = map.pixels[index + 0];
-        let g = map.pixels[index + 1];
-        let b = map.pixels[index + 2];
+      
+      index = 4 * (y * width + x);
 
-        // Compare manually
-        if (r === this.wallC[0] &&
-            g === this.wallC[1] &&
-            b === this.wallC[2]) {
-          //print("Wall");
-          this.pos.add(push*i,push*j)
+      let r = map.pixels[index + 0];
+      let g = map.pixels[index + 1];
+      let b = map.pixels[index + 2];
 
-          let away = createVector(-i, -j);
-          away.normalize();
-          this.desiredWallReflectionDir.add(away)
-        }
+      // Compare manually
+      if (r === this.wallC[0] &&
+          g === this.wallC[1] &&
+          b === this.wallC[2]) {
+        //print("Wall");
+        let normal = dir.copy().mult(-1).normalize();
+        this.pos.add(normal.mult(this.maxSpeed));
+        this.desiredWallReflectionDir.add(normal);
+      }
 
-        if (r === this.groundC[0] &&
-            g === this.groundC[1] &&
-            b === this.groundC[2]) {
-          //print("Ground");
-        }
+      if (r === this.groundC[0] &&
+          g === this.groundC[1] &&
+          b === this.groundC[2]) {
+        //print("Ground");
       }
     }
 
   }
 
   move(){
+
+    this.desiredDir = this.vel.copy().normalize();
+
     let randomUnitVector= p5.Vector.random2D();
     randomUnitVector.mult(this.wanderStrength)
     this.desiredDir.add(randomUnitVector)
