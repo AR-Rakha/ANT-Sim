@@ -1,13 +1,15 @@
 let canvasSize=[1200, 600];
 
 // ----- ANT Settings -----
-let total=1500;
+let total=500;
 let ants=[];
 
 // ----- Graphics -----
 let map;
 let maskedMap;
 let foodMap;
+
+let pheromoneMap;
 
 
 // ----- Colors -----
@@ -22,6 +24,8 @@ let runAnts=true;
 // ----- Buttons -----
 let mapEditor_B;
 let pauseAnts_B;
+let foodEditor_B;
+let pheromoneEditor_B
 
 // ----- Sliders -----
 let speedSlider;
@@ -30,11 +34,37 @@ function setup()
 {
 	pauseAnts_B=createCheckbox("Pause", false)
 	mapEditor_B=createCheckbox("DrawMap", false)
+	foodEditor_B=createCheckbox("DrawFood", false)
+	pheromoneEditor_B=createCheckbox("DrawPheromone", false)
+
+	foodEditor_B.changed(function(){
+		mapEditor_B.checked(false);
+		pheromoneEditor_B.checked(false);
+		pauseAnts_B.checked(true);
+	});
+	mapEditor_B.changed(function(){
+		foodEditor_B.checked(false);
+		pheromoneEditor_B.checked(false);
+		pauseAnts_B.checked(true);
+	});
+	pheromoneEditor_B.changed(function(){
+		foodEditor_B.checked(false);
+		mapEditor_B.checked(false);
+		pauseAnts_B.checked(true);
+	});
+	pauseAnts_B.changed(function(){
+		foodEditor_B.checked(false);
+		pheromoneEditor_B.checked(false);
+		mapEditor_B.checked(false);
+	});
+
+
 	speedSlider=createSlider(1, 10, 1,1)
 
 	createCanvas(canvasSize[0],canvasSize[1]);
 	map=createGraphics(canvasSize[0],canvasSize[1]);
 	foodMap=createGraphics(canvasSize[0],canvasSize[1]);
+	pheromoneMap=createGraphics(canvasSize[0],canvasSize[1],WEBGL);
 
 	for (let i = 0; i < total; i++) {
 		ants.push(new Ant(50,50,PI/2*3,groundColor,wallColor,FoodColor))
@@ -43,9 +73,11 @@ function setup()
 	pixelDensity(1)
 	map.pixelDensity(1);
 	foodMap.pixelDensity(1);
+	pheromoneMap.pixelDensity(1);
 
 	map.background(groundColor);
 	foodMap.clear();
+	pheromoneMap.background(0)
 	drawMapBorder()
 }
 
@@ -53,9 +85,9 @@ function draw()
 {
 	map.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
 	foodMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
-	background(0);
+	background(255);
 	
-	
+	blendMode(BLEND)
 	image(map, 0,0);	
 	blendMode(REMOVE);
   image(foodMap, 0, 0);
@@ -63,18 +95,33 @@ function draw()
 	
 	
 	if(runAnts){
-		for (let i = 0; i < total; i++) {
+		for (let j = 0; j < speedSlider.value(); j++) {
 			if(!pauseAnts_B.checked()){
-				for (let j = 0; j < speedSlider.value(); j++) {
+				for (let i = 0; i < total; i++) {
+					
 					ants[i].wallCollision(map);
 					ants[i].foodDetection(foodMap);
 					ants[i].collectFood(foodMap);
 					ants[i].update();
+					ants[i].addPheromone(pheromoneMap);
+				}	
+				pheromoneMap.blendMode(SUBTRACT);
+				if(frameCount%3==0){
+					pheromoneMap.stroke(0.53)
+					pheromoneMap.strokeWeight(600)
+					pheromoneMap.line(-canvasSize[0]/2,0,canvasSize[0]/2,0);
 				}
 			}
-			ants[i].show(1);
-		}	
+		}
 	}
+	for (let i = 0; i < total; i++) {
+		ants[i].show(1);
+	}	
+	
+	
+	blendMode(ADD)
+	image(pheromoneMap,0,0);
+
 }
 
 function keyPressed() {
@@ -134,21 +181,34 @@ function mouseDragged() {
 			
 		}
 	}
-	if(drawFood){
+	if(foodEditor_B.checked()){
 		if(mouseButton === LEFT){
 			foodMap.stroke(255);
 			foodMap.blendMode(BLEND);
 			foodMap.strokeWeight(10);
 			foodMap.line(pmouseX, pmouseY,mouseX, mouseY);
-			foodMap.blendMode(BLEND)
 			
 		}else if(mouseButton === RIGHT){
 			foodMap.stroke(0);
 			foodMap.blendMode(REMOVE)
 			foodMap.strokeWeight(60);
 			foodMap.line(pmouseX, pmouseY,mouseX, mouseY);
+		}
+	}
+	if(pheromoneEditor_B.checked()){
+		if(mouseButton === LEFT){
+			pheromoneMap.stroke(50,0,0);
+			pheromoneMap.blendMode(ADD);
+			pheromoneMap.strokeWeight(10);
+			pheromoneMap.line(pmouseX-canvasSize[0]/2, pmouseY-canvasSize[1]/2,mouseX-canvasSize[0]/2, mouseY-canvasSize[1]/2);
+			pheromoneMap.blendMode(BLEND)
 			
-			
+		}else if(mouseButton === RIGHT){
+			pheromoneMap.stroke(0,0,50);
+			pheromoneMap.blendMode(ADD)
+			pheromoneMap.strokeWeight(60);
+			pheromoneMap.line(pmouseX-canvasSize[0]/2, pmouseY-canvasSize[1]/2,mouseX-canvasSize[0]/2, mouseY-canvasSize[1]/2);
+			pheromoneMap.blendMode(BLEND)
 		}
 	}
 	drawMapBorder()
