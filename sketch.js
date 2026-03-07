@@ -52,6 +52,7 @@ function setup()
 function draw()
 {
 	map.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
+	foodMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
 	background(0);
 	
 	
@@ -65,7 +66,9 @@ function draw()
 		for (let i = 0; i < total; i++) {
 			if(!pauseAnts_B.checked()){
 				for (let j = 0; j < speedSlider.value(); j++) {
-					ants[i].wallCollision(map)
+					ants[i].wallCollision(map);
+					ants[i].foodDetection(foodMap);
+					ants[i].collectFood(foodMap);
 					ants[i].update();
 				}
 			}
@@ -142,7 +145,7 @@ function mouseDragged() {
 		}else if(mouseButton === RIGHT){
 			foodMap.stroke(0);
 			foodMap.blendMode(REMOVE)
-			foodMap.strokeWeight(30);
+			foodMap.strokeWeight(60);
 			foodMap.line(pmouseX, pmouseY,mouseX, mouseY);
 			
 			
