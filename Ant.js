@@ -14,7 +14,7 @@ class Ant{
     this.desiredTurningForce=createVector(0,0);
     
     this.maxSpeed=2;
-    this.turningStrength=1.2;
+    this.turningStrength=1;
     this.wanderStrength=0.3;
     this.wallReflectStrength=0.4;
 
