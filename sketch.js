@@ -19,13 +19,15 @@ let FoodColor=[80, 230, 50];
 
 // ----- Modes (Booleans) -----
 let drawFood=true;
-let runAnts=true;
+let runAnts=false;
 
 // ----- Buttons -----
 let mapEditor_B;
 let pauseAnts_B;
 let foodEditor_B;
-let pheromoneEditor_B
+let pheromoneEditor_B;
+
+let antEditor_B;
 
 // ----- Sliders -----
 let speedSlider;
@@ -61,13 +63,24 @@ function setup()
 
 	speedSlider=createSlider(1, 10, 1,1)
 
+	antEditor_B=createButton('StartAnts');
+	antEditor_B.mousePressed(function(){
+		if (antEditor_B.html() === 'StartAnts') {
+    antEditor_B.html('RestartAnts'); // Change label to 'Pressed'
+		runAnts=true;
+  } else {
+    antEditor_B.html('StartAnts'); // Change back to 'Click me'
+		runAnts=false;
+  }
+	});
+
 	createCanvas(canvasSize[0],canvasSize[1]);
 	map=createGraphics(canvasSize[0],canvasSize[1]);
 	foodMap=createGraphics(canvasSize[0],canvasSize[1]);
 	pheromoneMap=createGraphics(canvasSize[0],canvasSize[1],WEBGL);
 
 	for (let i = 0; i < total; i++) {
-		ants.push(new Ant(50,50,PI/2*3,groundColor,wallColor,FoodColor))
+		ants.push(new Ant(50,50,random(0, TWO_PI),groundColor,wallColor,FoodColor))
 	}
 
 	pixelDensity(1)
@@ -85,6 +98,8 @@ function draw()
 {
 	map.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
 	foodMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
+	pheromoneMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
+
 	background(255);
 	
 	blendMode(BLEND)
@@ -101,9 +116,11 @@ function draw()
 					
 					ants[i].wallCollision(map);
 					ants[i].foodDetection(foodMap);
+					ants[i].detectPheromone(pheromoneMap);
 					ants[i].collectFood(foodMap);
 					ants[i].update();
 					ants[i].addPheromone(pheromoneMap);
+					ants[i].storeFood()
 				}	
 				pheromoneMap.blendMode(SUBTRACT);
 				if(frameCount%3==0){

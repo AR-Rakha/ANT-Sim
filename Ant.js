@@ -10,6 +10,7 @@ class Ant{
     this.desiredDir=createVector(cos(angle),sin(angle));
     this.desiredWallReflectionDir=createVector(0,0);
     this.desiredFoodDir=createVector(0,0);
+    this.desiredPheromoneDir=createVector(0,0);
     
     this.desiredVel=createVector(0,0);
     this.desiredTurningForce=createVector(0,0);
@@ -19,6 +20,7 @@ class Ant{
     this.wanderStrength=0.3;
     this.wallReflectStrength=0.4;
     this.foodFollowStrength=0.1;
+    this.pheromoneFollowStrength=1
 
     this.groundC=groundColor;
     this.wallC=wallColor;
@@ -32,12 +34,15 @@ class Ant{
     }
 
     this.hasFood=false;
-    this.foodPos=createVector(0,0)
 
     this.foodSensorDirections=[];
     this.foodCheckPoints=7;
     this.foodSensorLayers=3;
-    this.foodSensorAngle=1;    
+    this.foodSensorAngle=1;
+    
+    this.pheromoneSensorDirections=[];
+    this.pheromoneCheckPoints=7;
+    this.pheromoneSensorAngle=1;
   }
 
   setPos(x,y){
@@ -148,25 +153,65 @@ class Ant{
         foodMap.ellipse(x,y,5)
         foodMap.blendMode(BLEND)
         this.hasFood=true;
+        this.angle+=PI
+        this.vel=createVector(cos(this.angle),sin(this.angle));
+
       }
+    }
+  }
+
+  storeFood(){
+    if(p5.Vector.dist(this.pos,this.colonyPos)<=30&&this.hasFood ){
+      this.hasFood=false;
+      this.angle+=PI
+      this.vel=createVector(cos(this.angle),sin(this.angle));
     }
   }
 
   addPheromone(pheromoneMap){
     if(!this.hasFood){
-      pheromoneMap.stroke(5,0,0);
+      pheromoneMap.stroke(1,0,0);
 			pheromoneMap.blendMode(ADD);
 			pheromoneMap.strokeWeight(4);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
 			pheromoneMap.blendMode(BLEND)
     }else{
-      pheromoneMap.stroke(0,0,5);
+      pheromoneMap.stroke(0,0,1);
 			pheromoneMap.blendMode(ADD);
 			pheromoneMap.strokeWeight(4);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
 			pheromoneMap.blendMode(BLEND)
+    }
+  }
+
+  detectPheromone(pheromoneMap,sensorOffset=3){
+    this.desiredPheromoneDir.set(0,0)
+
+    this.pheromoneSensorDirections=[]
+    for (let i = -1; i <= 1; i+=1/(this.pheromoneCheckPoints-1)*2) {
+      this.pheromoneSensorDirections.push(createVector(cos(i*this.pheromoneSensorAngle+this.angle), sin(i*this.pheromoneSensorAngle+this.angle))); 
+    }
+    for (let dir of this.pheromoneSensorDirections) {
+      let x = round(this.pos.x + dir.x * sensorOffset);
+      let y = round(this.pos.y + dir.y * sensorOffset);
+
+      if (x < 0 || x >= width || y < 0 || y >= height) continue;
+      let index = 4 * (y * width + x);
+
+      let r = pheromoneMap.pixels[index + 0];
+      let b = pheromoneMap.pixels[index + 2];
+      
+
+      // Compare manually
+      if (r > 0 && this.hasFood) {
+        let normal = dir.copy().normalize().mult(r/255);
+        this.desiredPheromoneDir.add(normal);
+      }else if(b > 0 && !this.hasFood) {
+        let normal = dir.copy().normalize().mult(b/255);
+        this.desiredPheromoneDir.add(normal);
+      }
     }
   }
 
@@ -183,6 +228,9 @@ class Ant{
 
     this.desiredFoodDir.mult(this.foodFollowStrength);
     this.desiredDir.add(this.desiredFoodDir);
+
+    this.desiredPheromoneDir.mult(this.pheromoneFollowStrength);
+    this.desiredDir.add(this.desiredPheromoneDir);
 
     this.desiredDir.normalize();
 
