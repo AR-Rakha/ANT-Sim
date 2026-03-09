@@ -154,9 +154,16 @@ class Ant{
 
   addPheromone(pheromoneMap){
     if(!this.hasFood){
-      pheromoneMap.stroke(0.6,0,0);
+      pheromoneMap.stroke(5,0,0);
 			pheromoneMap.blendMode(ADD);
-			pheromoneMap.strokeWeight(10);
+			pheromoneMap.strokeWeight(4);
+      pheromoneMap.noFill();
+			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
+			pheromoneMap.blendMode(BLEND)
+    }else{
+      pheromoneMap.stroke(0,0,5);
+			pheromoneMap.blendMode(ADD);
+			pheromoneMap.strokeWeight(4);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
 			pheromoneMap.blendMode(BLEND)
