@@ -4,6 +4,8 @@ let canvasSize=[1200, 600];
 let total=500;
 let ants=[];
 
+let colonyPos=[50,50]
+
 // ----- Graphics -----
 let map;
 let maskedMap;
@@ -80,7 +82,7 @@ function setup()
 	pheromoneMap=createGraphics(canvasSize[0],canvasSize[1],WEBGL);
 
 	for (let i = 0; i < total; i++) {
-		ants.push(new Ant(50,50,random(0, TWO_PI),groundColor,wallColor,FoodColor))
+		ants.push(new Ant(colonyPos[0],colonyPos[1],random(0, TWO_PI),groundColor,wallColor,FoodColor))
 	}
 
 	pixelDensity(1)
@@ -100,11 +102,9 @@ function draw()
 	foodMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
 	pheromoneMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
 
-	background(255);
-	
+	background(255);	
 	blendMode(BLEND)
 	image(map, 0,0);	
-	blendMode(REMOVE);
   image(foodMap, 0, 0);
   blendMode(BLEND);
 	
@@ -114,7 +114,8 @@ function draw()
 			if(!pauseAnts_B.checked()){
 				for (let i = 0; i < total; i++) {
 					
-					ants[i].wallCollision(map);
+					ants[i].wallCollision(map,3);
+					ants[i].wallReflection(map,8);
 					ants[i].foodDetection(foodMap);
 					ants[i].detectPheromone(pheromoneMap);
 					ants[i].collectFood(foodMap);
@@ -123,22 +124,26 @@ function draw()
 					ants[i].storeFood()
 				}	
 				pheromoneMap.blendMode(SUBTRACT);
-				if(frameCount%3==0){
-					pheromoneMap.stroke(0.53)
-					pheromoneMap.strokeWeight(600)
-					pheromoneMap.line(-canvasSize[0]/2,0,canvasSize[0]/2,0);
+				if(frameCount%4==0){
+					pheromoneMap.fill(0.53);
+					pheromoneMap.noStroke();
+					pheromoneMap.rect(-canvasSize[0]/2,-canvasSize[1]/2,canvasSize[0],canvasSize[1]);
 				}
 			}
 		}
 	}
+
+	blendMode(ADD);
+	image(pheromoneMap,0,0);
+	blendMode(BLEND);
+
 	for (let i = 0; i < total; i++) {
 		ants[i].show(1);
+		noStroke();
 	}	
-	
-	
-	blendMode(ADD)
-	image(pheromoneMap,0,0);
 
+	fill("green")
+	ellipse(colonyPos[0],colonyPos[1], 30)
 }
 
 function keyPressed() {

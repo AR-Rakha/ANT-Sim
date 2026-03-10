@@ -8,6 +8,7 @@ class Ant{
     this.angle=angle;
 
     this.desiredDir=createVector(cos(angle),sin(angle));
+    this.desiredWallCollisionDir=createVector(0,0);
     this.desiredWallReflectionDir=createVector(0,0);
     this.desiredFoodDir=createVector(0,0);
     this.desiredPheromoneDir=createVector(0,0);
@@ -16,11 +17,12 @@ class Ant{
     this.desiredTurningForce=createVector(0,0);
     
     this.maxSpeed=2;
-    this.turningStrength=1;
-    this.wanderStrength=0.3;
-    this.wallReflectStrength=0.4;
+    this.turningStrength=0.5;
+    this.wanderStrength=0.1;
+    this.wallCollisionStrength=0.4;
+    this.wallReflectStrength=0.5;
     this.foodFollowStrength=0.1;
-    this.pheromoneFollowStrength=1
+    this.pheromoneFollowStrength=0.5
 
     this.groundC=groundColor;
     this.wallC=wallColor;
@@ -41,8 +43,10 @@ class Ant{
     this.foodSensorAngle=1;
     
     this.pheromoneSensorDirections=[];
-    this.pheromoneCheckPoints=7;
-    this.pheromoneSensorAngle=1;
+    this.pheromoneCheckPoints=3;
+    this.pheromoneSensorAngle=1.3;
+    this.pheromoneAddInterval=2;
+    this.pheromoneIntensity=2;
   }
 
   setPos(x,y){
@@ -70,7 +74,7 @@ class Ant{
 
   wallCollision(map,sensorOffset=3){
 
-    this.desiredWallReflectionDir.set(0,0)
+    this.desiredWallCollisionDir.set(0,0)
     
     for (let dir of this.directions) {
       let x = round(this.pos.x + dir.x * sensorOffset);
@@ -96,16 +100,41 @@ class Ant{
         //print("Wall");
         let normal = dir.copy().mult(-1).normalize();
         this.pos.add(normal.mult(this.maxSpeed));
-        this.desiredWallReflectionDir.add(normal);
-      }
-
-      if (r === this.groundC[0] &&
-          g === this.groundC[1] &&
-          b === this.groundC[2]) {
-        //print("Ground");
+        this.desiredWallCollisionDir.add(normal);
       }
     }
+  }
 
+  wallReflection(map,sensorOffset=8){
+
+    this.desiredWallReflectionDir.set(0,0)
+    
+    for (let dir of this.directions) {
+      let x = round(this.pos.x + dir.x * sensorOffset);
+      let y = round(this.pos.y + dir.y * sensorOffset);
+
+      // Make sure we are inside canvas
+      if (x < 0 || x >= width || y < 0 || y >= height) continue;
+      if (this.pos.x < 0 || this.pos.x >= width || this.pos.y < 0 || this.pos.y >= height) this.pos=this.colonyPos.copy();
+
+      let index;
+
+      
+      index = 4 * (y * width + x);
+
+      let r = map.pixels[index + 0];
+      let g = map.pixels[index + 1];
+      let b = map.pixels[index + 2];
+
+      // Compare manually
+      if (r === this.wallC[0] &&
+          g === this.wallC[1] &&
+          b === this.wallC[2]) {
+        //print("Wall");
+        let normal = dir.copy().mult(-1).normalize();
+        this.desiredWallReflectionDir.add(normal);
+      }
+    }
   }
 
   foodDetection(foodMap,sensorOffset=6){
@@ -169,17 +198,17 @@ class Ant{
   }
 
   addPheromone(pheromoneMap){
-    if(!this.hasFood){
-      pheromoneMap.stroke(1,0,0);
+    if(!this.hasFood && frameCount%this.pheromoneAddInterval==0){
+      pheromoneMap.stroke(this.pheromoneIntensity,0,0);
 			pheromoneMap.blendMode(ADD);
-			pheromoneMap.strokeWeight(4);
+			pheromoneMap.strokeWeight(6);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
 			pheromoneMap.blendMode(BLEND)
-    }else{
-      pheromoneMap.stroke(0,0,1);
+    }else if(this.hasFood && frameCount%this.pheromoneAddInterval==0){
+      pheromoneMap.stroke(0,0,this.pheromoneIntensity);
 			pheromoneMap.blendMode(ADD);
-			pheromoneMap.strokeWeight(4);
+			pheromoneMap.strokeWeight(6);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
 			pheromoneMap.blendMode(BLEND)
@@ -225,6 +254,9 @@ class Ant{
 
     this.desiredWallReflectionDir.mult(this.wallReflectStrength);
     this.desiredDir.add(this.desiredWallReflectionDir);
+
+    this.desiredWallCollisionDir.mult(this.wallCollisionStrength);
+    this.desiredDir.add(this.desiredWallCollisionDir);
 
     this.desiredFoodDir.mult(this.foodFollowStrength);
     this.desiredDir.add(this.desiredFoodDir);
