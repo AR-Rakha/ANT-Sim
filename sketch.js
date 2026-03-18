@@ -1,4 +1,5 @@
 let canvasSize=[1200, 600];
+let frame_count=0;
 
 // ----- ANT Settings -----
 let total=500;
@@ -33,6 +34,7 @@ let antEditor_B;
 
 // ----- Sliders -----
 let speedSlider;
+
 
 function setup() 
 {
@@ -124,11 +126,12 @@ function draw()
 					ants[i].storeFood()
 				}	
 				pheromoneMap.blendMode(SUBTRACT);
-				if(frameCount%4==0){
+				if(frame_count%6==0){
 					pheromoneMap.fill(0.53);
 					pheromoneMap.noStroke();
 					pheromoneMap.rect(-canvasSize[0]/2,-canvasSize[1]/2,canvasSize[0],canvasSize[1]);
 				}
+				frame_count++
 			}
 		}
 	}

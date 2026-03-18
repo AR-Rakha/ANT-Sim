@@ -1,6 +1,8 @@
 class Ant{
   constructor(x,y,angle=0,groundColor,wallColor,FoodColor){
     this.colonyPos=createVector(x,y);
+    this.colonySize=20
+
     this.pos=createVector(x,y);
     this.vel=createVector(cos(angle),sin(angle));
     this.acc=createVector(0,0);
@@ -8,7 +10,6 @@ class Ant{
     this.angle=angle;
 
     this.desiredDir=createVector(cos(angle),sin(angle));
-    this.desiredWallCollisionDir=createVector(0,0);
     this.desiredWallReflectionDir=createVector(0,0);
     this.desiredFoodDir=createVector(0,0);
     this.desiredPheromoneDir=createVector(0,0);
@@ -18,11 +19,10 @@ class Ant{
     
     this.maxSpeed=2;
     this.turningStrength=0.5;
-    this.wanderStrength=0.1;
-    this.wallCollisionStrength=0.4;
+    this.wanderStrength=1;
     this.wallReflectStrength=0.5;
     this.foodFollowStrength=0.1;
-    this.pheromoneFollowStrength=0.5
+    this.pheromoneFollowStrength=0.8
 
     this.groundC=groundColor;
     this.wallC=wallColor;
@@ -43,10 +43,11 @@ class Ant{
     this.foodSensorAngle=1;
     
     this.pheromoneSensorDirections=[];
+    this.pheromoneSensorValues=[];
     this.pheromoneCheckPoints=3;
     this.pheromoneSensorAngle=1.3;
     this.pheromoneAddInterval=2;
-    this.pheromoneIntensity=2;
+    this.pheromoneIntensity=5;
   }
 
   setPos(x,y){
@@ -73,8 +74,6 @@ class Ant{
   }
 
   wallCollision(map,sensorOffset=3){
-
-    this.desiredWallCollisionDir.set(0,0)
     
     for (let dir of this.directions) {
       let x = round(this.pos.x + dir.x * sensorOffset);
@@ -100,7 +99,6 @@ class Ant{
         //print("Wall");
         let normal = dir.copy().mult(-1).normalize();
         this.pos.add(normal.mult(this.maxSpeed));
-        this.desiredWallCollisionDir.add(normal);
       }
     }
   }
@@ -190,7 +188,7 @@ class Ant{
   }
 
   storeFood(){
-    if(p5.Vector.dist(this.pos,this.colonyPos)<=30&&this.hasFood ){
+    if(p5.Vector.dist(this.pos,this.colonyPos)<=this.colonySize&&this.hasFood ){
       this.hasFood=false;
       this.angle+=PI
       this.vel=createVector(cos(this.angle),sin(this.angle));
@@ -198,17 +196,17 @@ class Ant{
   }
 
   addPheromone(pheromoneMap){
-    if(!this.hasFood && frameCount%this.pheromoneAddInterval==0){
+    if(!this.hasFood && frame_count%this.pheromoneAddInterval==0){
       pheromoneMap.stroke(this.pheromoneIntensity,0,0);
 			pheromoneMap.blendMode(ADD);
-			pheromoneMap.strokeWeight(6);
+			pheromoneMap.strokeWeight(5);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
 			pheromoneMap.blendMode(BLEND)
-    }else if(this.hasFood && frameCount%this.pheromoneAddInterval==0){
+    }else if(this.hasFood && frame_count%this.pheromoneAddInterval==0){
       pheromoneMap.stroke(0,0,this.pheromoneIntensity);
 			pheromoneMap.blendMode(ADD);
-			pheromoneMap.strokeWeight(6);
+			pheromoneMap.strokeWeight(5);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
 			pheromoneMap.blendMode(BLEND)
@@ -220,8 +218,10 @@ class Ant{
 
     this.pheromoneSensorDirections=[]
     for (let i = -1; i <= 1; i+=1/(this.pheromoneCheckPoints-1)*2) {
-      this.pheromoneSensorDirections.push(createVector(cos(i*this.pheromoneSensorAngle+this.angle), sin(i*this.pheromoneSensorAngle+this.angle))); 
+      this.pheromoneSensorDirections.push(createVector(cos(i*this.pheromoneSensorAngle+this.angle), sin(i*this.pheromoneSensorAngle+this.angle)));
+      this.pheromoneSensorValues.push(0) 
     }
+    let v=0
     for (let dir of this.pheromoneSensorDirections) {
       let x = round(this.pos.x + dir.x * sensorOffset);
       let y = round(this.pos.y + dir.y * sensorOffset);
@@ -232,16 +232,31 @@ class Ant{
       let r = pheromoneMap.pixels[index + 0];
       let b = pheromoneMap.pixels[index + 2];
       
-
       // Compare manually
+      if (this.hasFood) {
+        this.pheromoneSensorValues[v]=r
+      }else {
+        this.pheromoneSensorValues[v]=b
+      }
+
+      /*
       if (r > 0 && this.hasFood) {
         let normal = dir.copy().normalize().mult(r/255);
         this.desiredPheromoneDir.add(normal);
       }else if(b > 0 && !this.hasFood) {
         let normal = dir.copy().normalize().mult(b/255);
         this.desiredPheromoneDir.add(normal);
-      }
+      }*/
+      v++
     }
+    if(this.pheromoneSensorValues[1]>=Math.max(this.pheromoneSensorValues[0],this.pheromoneSensorValues[2])){
+      this.desiredPheromoneDir.add(this.pheromoneSensorDirections[1].copy().normalize());
+    }else if(this.pheromoneSensorValues[0]>this.pheromoneSensorValues[2]){
+      this.desiredPheromoneDir.add(this.pheromoneSensorDirections[0].copy().normalize());
+    }else if(this.pheromoneSensorValues[0]<this.pheromoneSensorValues[2]){
+      this.desiredPheromoneDir.add(this.pheromoneSensorDirections[2].copy().normalize());
+    }
+
   }
 
   move(){
@@ -254,9 +269,6 @@ class Ant{
 
     this.desiredWallReflectionDir.mult(this.wallReflectStrength);
     this.desiredDir.add(this.desiredWallReflectionDir);
-
-    this.desiredWallCollisionDir.mult(this.wallCollisionStrength);
-    this.desiredDir.add(this.desiredWallCollisionDir);
 
     this.desiredFoodDir.mult(this.foodFollowStrength);
     this.desiredDir.add(this.desiredFoodDir);
