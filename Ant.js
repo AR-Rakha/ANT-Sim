@@ -17,12 +17,12 @@ class Ant{
     this.desiredVel=createVector(0,0);
     this.desiredTurningForce=createVector(0,0);
     
-    this.maxSpeed=2;
-    this.turningStrength=0.5;
-    this.wanderStrength=1;
-    this.wallReflectStrength=0.5;
+    this.maxSpeed=4;
+    this.turningStrength=0.8;
+    this.wanderStrength=0.5;
+    this.wallReflectStrength=0.3;
     this.foodFollowStrength=0.1;
-    this.pheromoneFollowStrength=0.8
+    this.pheromoneFollowStrength=0.7;
 
     this.groundC=groundColor;
     this.wallC=wallColor;
@@ -40,12 +40,12 @@ class Ant{
     this.foodSensorDirections=[];
     this.foodCheckPoints=7;
     this.foodSensorLayers=3;
-    this.foodSensorAngle=1;
+    this.foodSensorAngle=0.5;
     
     this.pheromoneSensorDirections=[];
     this.pheromoneSensorValues=[];
     this.pheromoneCheckPoints=3;
-    this.pheromoneSensorAngle=1.3;
+    this.pheromoneSensorAngle=0.8;
     this.pheromoneAddInterval=2;
     this.pheromoneIntensity=5;
   }
@@ -135,7 +135,7 @@ class Ant{
     }
   }
 
-  foodDetection(foodMap,sensorOffset=6){
+  foodDetection(foodMap,sensorOffset=5){
     if(!this.hasFood){
       this.desiredFoodDir.set(0,0)
 
@@ -175,10 +175,10 @@ class Ant{
       let a = foodMap.pixels[index + 3];
       // Compare manually
       if (a === 255) {
-        foodMap.noStroke()
-        foodMap.blendMode(REMOVE)
-        foodMap.ellipse(x,y,5)
-        foodMap.blendMode(BLEND)
+        //foodMap.noStroke()
+        //foodMap.blendMode(REMOVE)
+        //foodMap.ellipse(x,y,5)
+        //foodMap.blendMode(BLEND)
         this.hasFood=true;
         this.angle+=PI
         this.vel=createVector(cos(this.angle),sin(this.angle));
@@ -195,25 +195,32 @@ class Ant{
     }
   }
 
-  addPheromone(pheromoneMap){
+  addPheromone(homePheromoneMap,foodPheromoneMap,map_resolution,maps_scale){
+    let x = round((this.pos.x-maps_scale/2)/maps_scale);
+    let y = round((this.pos.y-maps_scale/2)/maps_scale);
+    let index = (y * map_resolution[0] + x);
+
     if(!this.hasFood && frame_count%this.pheromoneAddInterval==0){
-      pheromoneMap.stroke(this.pheromoneIntensity,0,0);
+      /*pheromoneMap.stroke(this.pheromoneIntensity,0,0);
 			pheromoneMap.blendMode(ADD);
 			pheromoneMap.strokeWeight(5);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
-			pheromoneMap.blendMode(BLEND)
+			pheromoneMap.blendMode(BLEND)*/
+      homePheromoneMap[index]+=20
+
     }else if(this.hasFood && frame_count%this.pheromoneAddInterval==0){
-      pheromoneMap.stroke(0,0,this.pheromoneIntensity);
+      /*pheromoneMap.stroke(0,0,this.pheromoneIntensity);
 			pheromoneMap.blendMode(ADD);
 			pheromoneMap.strokeWeight(5);
       pheromoneMap.noFill();
 			pheromoneMap.ellipse(this.pos.x-canvasSize[0]/2, this.pos.y-canvasSize[1]/2,0.5);
-			pheromoneMap.blendMode(BLEND)
+			pheromoneMap.blendMode(BLEND)*/
+      foodPheromoneMap[index]+=20
     }
   }
 
-  detectPheromone(pheromoneMap,sensorOffset=3){
+  detectPheromone(homePheromoneMap,foodPheromoneMap,map_resolution,maps_scale,sensorOffset=15){
     this.desiredPheromoneDir.set(0,0)
 
     this.pheromoneSensorDirections=[]
@@ -223,14 +230,14 @@ class Ant{
     }
     let v=0
     for (let dir of this.pheromoneSensorDirections) {
-      let x = round(this.pos.x + dir.x * sensorOffset);
-      let y = round(this.pos.y + dir.y * sensorOffset);
+      let x = round(((this.pos.x + dir.x * sensorOffset)-maps_scale/2)/maps_scale);
+      let y = round(((this.pos.y + dir.y * sensorOffset)-maps_scale/2)/maps_scale);
 
-      if (x < 0 || x >= width || y < 0 || y >= height) continue;
-      let index = 4 * (y * width + x);
+      if (x < 0 || x >= map_resolution[0] || y < 0 || y >= map_resolution[1]) continue;
+      let index = (y * map_resolution[0] + x);
 
-      let r = pheromoneMap.pixels[index + 0];
-      let b = pheromoneMap.pixels[index + 2];
+      let r = homePheromoneMap[index];
+      let b = foodPheromoneMap[index];
       
       // Compare manually
       if (this.hasFood) {
@@ -256,7 +263,7 @@ class Ant{
     }else if(this.pheromoneSensorValues[0]<this.pheromoneSensorValues[2]){
       this.desiredPheromoneDir.add(this.pheromoneSensorDirections[2].copy().normalize());
     }
-
+    this.pheromoneSensorValues = [];
   }
 
   move(){

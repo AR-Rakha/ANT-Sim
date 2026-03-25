@@ -14,6 +14,15 @@ let foodMap;
 
 let pheromoneMap;
 
+// ----- Custom maps -----
+
+let home_pheromone_map=[];
+let food_pheromone_map=[];
+
+let maps_scale=10;
+let map_low_res=[canvasSize[0]/maps_scale,canvasSize[1]/maps_scale]
+
+
 
 // ----- Colors -----
 let wallColor=[100, 50, 10];
@@ -96,13 +105,19 @@ function setup()
 	foodMap.clear();
 	pheromoneMap.background(0)
 	drawMapBorder()
+
+	for(let i=0;i<map_low_res[0]*map_low_res[1];i++){ 
+    home_pheromone_map.push(0);
+		food_pheromone_map.push(0);
+  } 
+
 }
 
 function draw()
 {
 	map.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
 	foodMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
-	pheromoneMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
+	//pheromoneMap.loadPixels();   // ← THIS IS REQUIRED EVERY FRAME
 
 	background(255);	
 	blendMode(BLEND)
@@ -117,28 +132,28 @@ function draw()
 				for (let i = 0; i < total; i++) {
 					
 					ants[i].wallCollision(map,3);
-					ants[i].wallReflection(map,8);
+					ants[i].wallReflection(map,15);
 					ants[i].foodDetection(foodMap);
-					ants[i].detectPheromone(pheromoneMap);
+					ants[i].detectPheromone(home_pheromone_map,food_pheromone_map,map_low_res,maps_scale);
 					ants[i].collectFood(foodMap);
 					ants[i].update();
-					ants[i].addPheromone(pheromoneMap);
+					ants[i].addPheromone(home_pheromone_map,food_pheromone_map,map_low_res,maps_scale);
 					ants[i].storeFood()
 				}	
-				pheromoneMap.blendMode(SUBTRACT);
+				/*pheromoneMap.blendMode(SUBTRACT);
 				if(frame_count%6==0){
 					pheromoneMap.fill(0.53);
 					pheromoneMap.noStroke();
 					pheromoneMap.rect(-canvasSize[0]/2,-canvasSize[1]/2,canvasSize[0],canvasSize[1]);
-				}
+				}*/
 				frame_count++
 			}
 		}
 	}
 
-	blendMode(ADD);
+	/*blendMode(ADD);
 	image(pheromoneMap,0,0);
-	blendMode(BLEND);
+	blendMode(BLEND);*/
 
 	for (let i = 0; i < total; i++) {
 		ants[i].show(1);
@@ -147,6 +162,28 @@ function draw()
 
 	fill("green")
 	ellipse(colonyPos[0],colonyPos[1], 30)
+	noStroke();
+  let x = round((mouseX-maps_scale/2)/maps_scale);
+  let y = round((mouseY-maps_scale/2)/maps_scale);
+  home_pheromone_map[y*map_low_res[0]+x]+=1530
+
+  
+  for(let i=0;i<map_low_res[0];i++){
+    for(let j=0;j<map_low_res[1];j++){ 
+      fill(home_pheromone_map[j*map_low_res[0]+i]/5,food_pheromone_map[j*map_low_res[0]+i]/5,0,150)
+      rect(maps_scale*i,maps_scale*j,maps_scale) 
+      //home_pheromone_map[j*map_res[0]+i]-= 0.05*(1.03 **home_pheromone_map[j*map_res[0]+i] - 1)
+			for (let s = 0; s < speedSlider.value(); s++) {
+				home_pheromone_map[j*map_low_res[0]+i]*=0.99
+				food_pheromone_map[j*map_low_res[0]+i]*=0.99
+				//home_pheromone_map[j*map_low_res[0]+i]-=0.1
+				home_pheromone_map[j*map_low_res[0]+i] = min(max(0,home_pheromone_map[j*map_low_res[0]+i]),255*30)
+				food_pheromone_map[j*map_low_res[0]+i] = min(max(0,food_pheromone_map[j*map_low_res[0]+i]),255*30)
+			}
+    } 
+  } 
+
+	//text(round(frameRate()),400,400)
 }
 
 function keyPressed() {
