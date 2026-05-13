@@ -2,3 +2,309 @@
   margin: 0;
   padding: 0;
 }
+
+/* Slider */
+.SpeedSlider{
+  /* removing default appearance */
+  -webkit-appearance: none;
+  appearance: none;
+  /* creating a custom design */
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+
+  transform:rotate(270deg);
+
+  /*  styling the track  */
+  height: 15px;
+  background: #ddd;
+  border-radius: 16px;
+  
+  overflow: hidden;
+}
+
+.SpeedSlider::-webkit-slider-thumb {
+  /* removing default appearance */
+  -webkit-appearance: none;
+  appearance: none;
+  /* creating a custom design */
+  height: 15px;
+  width: 15px;
+  background-color: red;
+  border-radius: 50%;
+  border: none;
+
+  box-shadow: -407px 0 0 400px darkred;
+}
+
+.SpeedSlider::-moz-range-thumb {
+  height: 15px;
+  width: 15px;
+  background-color: red;
+  border-radius: 50%;
+  border: none;
+  
+  box-shadow: -407px 0 0 400px darkred;
+}
+
+
+
+
+/* Brush */
+.Brush{
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+
+/* Pause Class */
+
+div.Pause label{
+  /* Text */
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+
+  /* Checkbox */
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+}
+
+div.Pause input{
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: darkred;
+
+  font: inherit;
+  color: darkred;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid darkred;
+  border-radius: 0.55em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+div.Pause input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em red;
+
+  transform-origin: bottom left;
+  clip-path: polygon(15% 85%, 15% 15%, 35% 15%, 35% 85%, 65% 85%, 65% 15%, 85% 15%, 85% 85%);
+}
+
+div.Pause input:checked::before {
+  transform: scale(1);
+}
+
+/* Map Class */
+
+div.Map label{
+  /* Text */
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+
+  /* Checkbox */
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+}
+
+div.Map input{
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: rgb(100, 50, 10);
+
+  font: inherit;
+  color: rgb(100, 50, 10);
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid rgb(100, 50, 10);
+  border-radius: 0.55em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+div.Map input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em rgb(170, 120, 80);
+
+  transform-origin: bottom left;
+  clip-path: shape(from 26.11% 79.27%,curve to 14.62% 74.37% with 20.12% 78.06%,curve to 6.10% 64.68% with 9.11% 70.69%,curve to 7.79% 52.40% with 3.08% 58.67%,curve to 11.94% 40.17% with 12.50% 46.13%,curve to 12.89% 27.88% with 11.39% 34.20%,curve to 18.05% 15.59% with 14.39% 21.55%,curve to 29.86% 12.04% with 21.72% 9.63%,curve to 43.01% 7.48% with 38.00% 14.45%,curve to 54.33% 4.04% with 48.02% 0.51%,curve to 64.45% 13.24% with 60.64% 7.57%,curve to 73.26% 21.19% with 68.26% 18.92%,curve to 82.19% 27.60% with 78.25% 23.47%,curve to 89.84% 36.83% with 86.14% 31.72%,curve to 93.86% 48.25% with 93.55% 41.95%,curve to 90.24% 59.71% with 94.17% 54.56%,curve to 84.76% 70.69% with 86.30% 64.86%,curve to 80.37% 82.90% with 83.21% 76.53%,curve to 71.03% 91.16% with 77.52% 89.28%,curve to 58.08% 91.76% with 64.53% 93.05%,curve to 46.23% 88.51% with 51.62% 90.47%,curve to 36.47% 83.51% with 40.84% 86.54%,curve to 26.11% 79.27% with 32.10% 80.47%);
+}
+
+div.Map input:checked::before {
+  transform: scale(1);
+}
+
+/* Food Class */
+
+div.Food label{
+  /* Text */
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+
+  /* Checkbox */
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+}
+
+div.Food input{
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: darkgreen;
+
+  font: inherit;
+  color: darkgreen;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid darkgreen;
+  border-radius: 0.55em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+div.Food input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em rgb(80, 230, 50);
+
+  transform-origin: bottom left;
+	clip-path: shape(from 75% 50%,arc by -25% -25% of 25% large ccw,arc by -25% 25% of 25% large ccw,arc by 25% 25% of 25% large ccw,arc by 25% -25% of 25% large ccw,close,move by -25% 12.5%,arc by 0% -25% of 12.5% large cw,arc by 0% 25% of 12.5% small cw,close);
+}
+
+div.Food input:checked::before {
+  transform: scale(1);
+}
+
+/* Phe Class */
+
+div.Phe label{
+  /* Text */
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+
+  /* Checkbox */
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+}
+
+div.Phe input{
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: darkorange;
+
+  font: inherit;
+  color: darkorange;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid darkorange;
+  border-radius: 0.55em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+div.Phe input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em yellow;
+
+  transform-origin: bottom left;
+	clip-path: shape(from 91.43% 70.71%,line by -13.79% -6.9%,arc by 0% -27.62% of 15.45% 15.44% small cw,line by 13.79% -6.9%,arc by -20.72% -20.71% of 15.45% 15.44% large ccw,line by -6.88% 13.81%,arc by -27.63% 0% of 15.45% 15.44% small cw,line by -6.91% -13.78%,arc by -20.69% 20.69% of 15.45% 15.44% large ccw,line by 13.79% 6.9%,arc by 0% 27.62% of 15.45% 15.44% small cw,line by -13.79% 6.9%,arc by 20.69% 20.69% of 15.45% 15.44% large ccw,line by 6.91% -13.78%,arc by 27.63% 0% of 15.45% 15.44% small cw,line by 6.91% 13.78%,arc by 20.72% -20.71% of 15.45% 15.44% large ccw,close);
+}
+
+div.Phe input:checked::before {
+  transform: scale(1);
+}
+
+/* Phe-S Class */
+
+div.Phe-S label{
+  /* Text */
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+
+  /* Checkbox */
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+}
+
+div.Phe-S input{
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: darkcyan;
+
+  font: inherit;
+  color: darkcyan;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid darkcyan;
+  border-radius: 0.55em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+div.Phe-S input::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em lightblue;
+
+  transform-origin: bottom left;
+	clip-path: shape(from 89.99% 33.82%,line to 74.11% 25.89%,line by -7.92% -15.88%,arc by -32.36% 0% of 18.08% small ccw,line to 25.89% 25.89%,line by -15.88% 7.92%,arc by 0% 32.36% of 18.08% small ccw,line to 25.89% 74.11%,line by 7.92% 15.88%,arc by 32.36% 0% of 18.08% small ccw,line to 74.11% 74.11%,line by 15.88% -7.92%,arc by 0% -32.36% of 18.08% small ccw,close);
+}
+
+div.Phe-S input:checked::before {
+  transform: scale(1);
+}
+
+button.Reset{
+  font-family: system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.1;
+  padding: 0.5em;
+  border-radius: 25rem;
+  border: none;
+}
